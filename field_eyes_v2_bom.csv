@@ -59,8 +59,6 @@
 "R423,R425","3.3k","Resistor_SMD:R_0603_1608Metric","2",""
 "R424,R426","6.8k","Resistor_SMD:R_0603_1608Metric","2",""
 "SV1","PROG (as old SV1)","field_eyes:MA03-2","1",""
-"SW201","RESET","Button_Switch_SMD:SW_SPST_TL3342","1",""
-"SW202","BOOT","Button_Switch_SMD:SW_SPST_TL3342","1",""
 "TH101","10k B3950 (under cell)","Resistor_SMD:R_0603_1608Metric","1",""
 "TP301","STATUS","TestPoint:TestPoint_Pad_D1.5mm","1",""
 "U101","CN3791","Package_SO:SSOP-10_3.9x4.9mm_P1.00mm","1",""

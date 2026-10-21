@@ -1,8 +1,8 @@
 # Field Eyes v2: full board schematic (KiCad 9)
 
-Open `field_eyes_v2.kicad_pro` in KiCad 9. The whole circuit is **one flat schematic** (`field_eyes_v2.kicad_sch`): all 170 parts are on a single page, in four framed sections. The same page is in `field_eyes_v2.pdf`, and the parts list is in `field_eyes_v2_bom.csv`.
+Open `field_eyes_v2.kicad_pro` in KiCad 9. The whole circuit is **one flat schematic** (`field_eyes_v2.kicad_sch`): all 168 parts are on a single page, in four framed sections. The same page is in `field_eyes_v2.pdf`, and the parts list is in `field_eyes_v2_bom.csv`.
 
-The design has 170 parts. KiCad's electrical rules check (ERC) reports 0 violations, and every net connects at least two pins.
+The design has 168 parts. KiCad's electrical rules check (ERC) reports 0 violations, and every net connects at least two pins.
 
 **Status: schematic only.** There is no PCB layout yet. Nothing has been built or tested.
 
@@ -10,7 +10,7 @@ The design has 170 parts. KiCad's electrical rules check (ERC) reports 0 violati
 |---|---|
 | Top of the page | Title, power tree, what changed from the old board, PCB layout notes |
 | 1 Power (parts R1xx, C1xx...) | 6 V solar panel → CN3791 MPPT charger → 18650 cell with DW01A + FS8205 protection. XC6220 3.3 V regulator. AO3401A-switched +3V3_SW and +12V_SENS (MT3608 boost). Battery voltage, temperature and charge-status sensing. |
-| 2 ESP32 (2xx) | ESP32-WROOM-32D. EN delay. RESET and BOOT buttons. Programming header **SV1** (the same 2 × 3 header and pin order as the old board: DTR, 3V3, TX, RX, RTS, GND) with auto-reset. OLED (**X3**) and DHT22 (**X4**) on 4-pin JST XH connectors with the old board's pinouts. 4 × M3 mounting holes. ESP32 pin map. |
+| 2 ESP32 (2xx) | ESP32-WROOM-32D. EN delay. Programming header **SV1** (the same 2 × 3 header and pin order as the old board: DTR, 3V3, TX, RX, RTS, GND) with auto-reset. OLED (**X3**) and DHT22 (**X4**) on 4-pin JST XH connectors with the old board's pinouts. 4 × M3 mounting holes. ESP32 pin map. |
 | 3 Modem (3xx) | A7672S running straight from the cell, with 470 µF and the SIMCom capacitor set. PWRKEY and RESET drivers. UART level shifters. RI wake. Network LED. SIM holder with 22 Ω resistors and ESD. U.FL antenna with matching pads. Service header for modem firmware updates. |
 | 4 Sensors and valve (4xx) | 2 × **MAX485ESA+T** RS485 (SMT100 on **X2**, 7-in-1 on **X1**) with automatic direction and SM712 protection. X1/X2 are 4-pin JST XH, pin 1 A, 2 B, 3 +12 V, 4 GND, as on the old board. A 78L05 (U405) makes the 5 V the MAX485 needs; dividers (3.3k/6.8k) bring its receive output down to 3.4 V for the ESP32. MX1508 driver for the latching valve (the chip from your mini-L298N module). |
 
@@ -85,9 +85,13 @@ The solar input (J101) and the valve coil (J403) stay as 2-pin screw terminals b
 
 The board file was updated to match: the footprints are in `field_eyes.pretty`, which now includes the JST and SV1 footprints copied from your old board. The new parts were placed in free spots and are provisional. Files from before this change are in `backups/`.
 
-## Board layout (follows the old design)
+## Board layout (follows the old design, sized for the enclosure)
 
-The board is 128.3 × 60 mm with rounded corners: your old board's 100 × 60 mm, widened by 28 mm on the left for the new power and valve circuits. Everything that was on the old board keeps its old position, measured from the old board's right-hand end:
+**Enclosure:** DFRobot plastic project box, 5.83 × 3.70 × 2.36 in = about **148 × 94 × 60 mm** outside (the shop page gives only these overall figures; the interior is roughly 142 × 88 mm if the walls are about 3 mm).
+
+The board is **118.3 × 68 mm** with 4 mm rounded corners. That leaves about 12 mm to the walls on the long sides and 10 mm on the short sides, which should keep it clear of the lid-screw posts in the corners. **Measure the inside of your box and its posts before ordering boards.** The 18650 holder (88 mm) lies on the back along the long side; the tallest part on the top is the 13 mm valve capacitor C403, so cell, board and parts stack to roughly 43 mm of the 55 mm inside height (also worth checking).
+
+It is the old board's 100 × 60 mm layout, widened by 18 mm on the left and 8 mm at the bottom for the new circuits. Everything that was on the old board keeps its old arrangement:
 
 - ESP32 left of centre with SV1 above it, and the GPS connector (J304) with its parts on the top edge
 - the modem on the right, with the LTE antenna connector (J301) on the right edge
@@ -95,6 +99,10 @@ The board is 128.3 × 60 mm with rounded corners: your old board's 100 × 60 mm,
 - the sensor connectors X2 (SMT100), X1 (7-in-1) and X4 (DHT22) along the bottom edge; X3 (OLED) beside the ESP32
 - the modem control transistors in a row above the modem, the network LED and its transistor on the right edge, and the modem supply capacitors at the bottom right
 
-New on the left: the solar charger, battery protection, 3.3 V regulator, 12 V boost and switches, the valve driver with its big capacitor, and the solar (J101) and valve (J403) terminals. The 18650 holder is on the back of the board, under the middle, with its temperature sensor.
+New on the left: the solar charger, battery protection, 3.3 V regulator, 12 V boost and switches, the valve driver with its big capacitor, and the solar (J101) and valve (J403) terminals. The 18650 holder is on the back, with its temperature sensor.
 
-All parts are placed with no overlaps. No tracks yet. Run `tools/place_like_old.py` again to redo the placement from the previous board (`backups/`).
+All 168 parts are placed with no overlaps. There are no tracks yet. A smaller board also places (106 × 64 mm) but would be crowded and hard to route. `tools/place_like_old.py <board> <out> <extra width> <height>` redoes the placement at another size; the previous layouts are in `backups/`.
+
+## No buttons
+
+The RESET and BOOT buttons were removed. The board is reset and put in boot mode by the programming adapter on SV1 (RTS drives EN, DTR drives IO0, through the two-transistor auto-reset circuit), so flashing needs an adapter that brings out DTR and RTS on pins 1 and 5. Without a button there is no manual reset: switching the power off and on (or the adapter's RTS) does it.

@@ -5,6 +5,7 @@ import pcbnew
 pcb, out = sys.argv[1], sys.argv[2]
 DW = float(sys.argv[3]) if len(sys.argv) > 3 else 28.0       # extra width on the left (mm)
 H = float(sys.argv[4]) if len(sys.argv) > 4 else 60.0
+DH = H - 59.9                                                  # extra height, added under the old middle of the board
 RAD = 4.0
 mm, tomm = pcbnew.FromMM, pcbnew.ToMM
 board = pcbnew.LoadBoard(pcb)
@@ -46,19 +47,22 @@ def pack(region, refs, gap=0.3, rot=0):
     if y + rowh > y1 + 1e-6:
         print(f'  ! region {region} overflows to y={y + rowh:.1f} at {refs[-1]}')
 
+# parts that sat on the old board's bottom edge move down with it, so the bottom row stays on the (now lower) edge
+BOTTOM = {'J302', 'X1', 'X2', 'X4', 'U401', 'U402', 'Q401', 'Q402', 'U302', 'R314', 'R315', 'R316', 'C310', 'TP301', 'J403'}
+oy_of = lambda ref, oy: oy + (DH if ref in BOTTOM else 0.0)
 # ------------------------------------------------------------------ the old design's positions (old x + DW)
 HARD = {   # parts that sit exactly where they did on the old board: ref: (old x, old y, rotation)
     'SV1': (50.6, 4.8, 0), 'J304': (59.7, 6.0, 270), 'X3': (54.8, 22.5, 90), 'J301': (95.2, 25.9, 180),
     'J302': (81.4, 51.8, 0), 'X2': (31.2, 55.4, 0), 'X1': (45.4, 55.3, 0), 'X4': (59.6, 55.3, 0),
 }
 for ref, (ox, oy, rot) in HARD.items():
-    put(ref, ox + DW, oy, rot)
+    put(ref, ox + DW, oy_of(ref, oy), rot)
 put('U201', 36.2 + DW, 2.3 + 15.8, 0, origin=True)      # ESP32: body top 2.3 mm from the edge, as before
 put('U301', 75.7 + DW, 25.8, 270, origin=True)
 for ref, (x, y) in zip(('H201', 'H202', 'H203', 'H204'), ((3.6, 3.6), (W - 3.6, 3.6), (3.6, H - 3.6), (W - 3.6, H - 3.6))):
     put(ref, x, y)
-put('BT101', W / 2, 36.0, 0)                           # battery holder on the back
-put('TH101', W / 2 + 12, 36.0, 0)
+put('BT101', W / 2, 34.0, 0)                           # battery holder on the back
+put('TH101', W / 2 + 12, 34.0, 0)
 
 def box(ref):
     fp = fps[ref]
@@ -113,24 +117,24 @@ NEAR = {
 }
 # big or fussy first
 for ref in ('C301', 'U401', 'U402', 'U302', 'D302', 'Q306', 'Q304', 'Q302', 'Q303', 'Q401', 'Q402', 'L301', 'R318', 'C313'):
-    ox, oy, rot = NEAR[ref]; autoplace(ref, (ox + DW, oy), rot)
+    ox, oy, rot = NEAR[ref]; autoplace(ref, (ox + DW, oy_of(ref, oy)), rot)
 for ref, (ox, oy, rot) in NEAR.items():
     if ref not in placed:
-        autoplace(ref, (ox + DW, oy), rot)
-autoplace('J303', (DW + 99.0, 56.0), 90)
-autoplace('SW201', (49.0, 10.0), 90); autoplace('SW202', (49.0, 20.5), 90)
-autoplace('J101', (5.5, 22.0), 90); autoplace('J403', (14.0, 54.0), 0); autoplace('C403', (36.0, 51.0), 0)
+        autoplace(ref, (ox + DW, oy_of(ref, oy)), rot)
+autoplace('J303', (DW + 99.0, 56.0 + DH), 90)
+autoplace('SW201', (DW + 14.0, 10.0), 90); autoplace('SW202', (DW + 14.0, 20.5), 90)
+autoplace('J101', (5.5, 22.0), 90); autoplace('J403', (14.0, H - 6.0), 0); autoplace('C403', (28.0, H - 10.0), 0)
 group(['Q301', 'Q305', 'R301', 'R302', 'R303', 'R304', 'R305', 'R306', 'R307', 'R308', 'R309', 'R310', 'C307', 'C308', 'C309'], (DW + 76.0, 7.0))
 group(['C202', 'C203', 'C204', 'R201', 'C201', 'R202', 'Q201', 'Q202', 'R203', 'R204'], (DW + 36.0, 31.5))
 group(['R205', 'R206', 'R207'], (DW + 49.0, 22.0))
 group(['U101', 'L101', 'D101', 'D102', 'Q101', 'Q102', 'R103', 'C101', 'C105', 'C102', 'C103', 'R101', 'R104', 'C104', 'R105', 'R106',
-       'R107', 'R108', 'Q103'], (15.0, 11.0))
+       'R107', 'R108', 'Q103'], (11.0, 11.0))
 group(['U104', 'L102', 'D103', 'C114', 'C113', 'Q105', 'Q106', 'Q107', 'Q108', 'R118', 'R119', 'R114', 'R115', 'R116', 'R117', 'R120',
-       'C109', 'C110', 'C112', 'U405', 'C408', 'C409'], (36.0, 14.0))
-group(['U102', 'Q104', 'U103', 'R109', 'C106', 'R110', 'R111', 'R112', 'C107', 'R113', 'C108', 'C111'], (15.0, 32.0))
-group(['U403', 'U404', 'D403', 'JP401', 'C404', 'C405', 'C406', 'C407', 'R421', 'R422'], (28.0, 50.0))
+       'C109', 'C110', 'C112', 'U405', 'C408', 'C409'], (DW + 6.0, 14.0))
+group(['U102', 'Q104', 'U103', 'R109', 'C106', 'R110', 'R111', 'R112', 'C107', 'R113', 'C108', 'C111'], (12.0, 32.0))
+group(['U403', 'U404', 'D403', 'JP401', 'C404', 'C405', 'C406', 'C407', 'R421', 'R422'], (24.0, H - 14.0))
 group(['R401', 'R402', 'R403', 'R404', 'R405', 'R406', 'R407', 'R411', 'R412', 'R413', 'R414', 'R415', 'R416', 'R417', 'R423', 'R424',
-       'R425', 'R426', 'C401', 'C402', 'D401', 'D402'], (DW + 22.0, 41.0))
+       'R425', 'R426', 'C401', 'C402', 'D401', 'D402'], (DW + 20.0, 42.0 + DH))
 
 # ------------------------------------------------------------------ checks
 missing = [r for r in fps if r not in placed]

@@ -8143,7 +8143,7 @@
 		(uuid "494cba9d-6a2d-4b50-bcc5-4d60ae67ae40")
 	)
 	(text
-		"EN: 10k + 1 uF delay (Espressif reference) so the chip starts only after 3.3 V is stable.\nQ201/Q202: the usual two-transistor auto-reset, so esptool can reset and enter the bootloader through\nDTR/RTS of a USB-serial adapter (same pin order as the old SV1 header). Strapping pins IO0/IO2/IO12/IO15\nare left free or pulled the safe way. Flash pins (SD0-SD3, CLK, CMD) must stay unconnected.\nDo not connect the adapter's 3.3 V while the battery is fitted (two regulators would fight)."
+		"EN: 10k + 1 uF delay (Espressif reference) so the chip starts only after 3.3 V is stable.\nQ201/Q202: the usual two-transistor auto-reset, so esptool can reset and enter the bootloader through\nDTR/RTS of a USB-serial adapter (same pin order as the old SV1 header). Strapping pins IO0/IO2/IO12/IO15\nare left free or pulled the safe way. Flash pins (SD0-SD3, CLK, CMD) must stay unconnected.\nDo not connect the adapter's 3.3 V while the battery is fitted (two regulators would fight).\nThere are no reset or boot buttons: reset and boot mode come from the programming header SV1 (RTS -> EN, DTR -> IO0)."
 		(exclude_from_sim no)
 		(at 439.1 143.38 0)
 		(effects (font (size 1.27 1.27)) (justify left top))
@@ -8661,138 +8661,6 @@
 			(at 556.26 261.62 0)
 			(effects (font (size 1.27 1.27)) (justify left) (hide yes))
 		)
-	)
-	(symbol
-		(lib_id "Switch:SW_Push")
-		(at 459.74 213.36 90)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "20ad539b-de2a-40f0-b82e-38028edd7b22")
-		(property "Reference" "SW201" (at 463.1 213.38 90) (effects (font (size 1.27 1.27)) (justify left)))
-		(property "Value" "RESET" (at 463.1 216.38 90) (effects (font (size 1.27 1.27)) (justify left)))
-		(property
-			"Footprint"
-			"Button_Switch_SMD:SW_SPST_TL3342"
-			(at 459.74 213.36 0)
-			(effects (font (size 1.27 1.27)) (hide yes))
-		)
-		(property "Datasheet" "~" (at 459.74 213.36 0) (effects (font (size 1.27 1.27)) (hide yes)))
-		(property "Description" "" (at 459.74 213.36 0) (effects (font (size 1.27 1.27)) (hide yes)))
-		(pin "1" (uuid "eebbd5d3-659e-4ac6-8ee2-e8e791318460"))
-		(pin "2" (uuid "fee5b02d-6e97-485a-9cb7-f9173b834141"))
-		(instances
-			(project "field_eyes_v2" (path "/1d2f7a40-5c1b-4f0e-9a6e-3b8c2d7e5f10" (reference "SW201") (unit 1)))
-		)
-	)
-	(wire
-		(pts (xy 459.74 218.44) (xy 459.74 220.98))
-		(stroke (width 0) (type default))
-		(uuid "04f809b0-c249-44b9-90b1-645ba8ebc70e")
-	)
-	(symbol
-		(lib_id "power:GND")
-		(at 459.74 220.98 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom no)
-		(on_board no)
-		(dnp no)
-		(uuid "88b80999-d46f-4e1c-942d-ca0298643cc1")
-		(property
-			"Reference"
-			"#PWR0038"
-			(at 464.82 219.71 0)
-			(effects (font (size 1.27 1.27)) (justify left) (hide yes))
-		)
-		(property "Value" "GND" (at 464.82 222.25 0) (effects (font (size 1.27 1.27)) (justify left) (hide yes)))
-		(property "Footprint" "" (at 459.74 220.98 0) (effects (font (size 1.27 1.27)) (hide yes)))
-		(property "Datasheet" "~" (at 459.74 220.98 0) (effects (font (size 1.27 1.27)) (hide yes)))
-		(property "Description" "" (at 459.74 220.98 0) (effects (font (size 1.27 1.27)) (hide yes)))
-		(pin "1" (uuid "8fa9359d-c8f7-42d3-a5dc-745a3434e672"))
-		(instances
-			(project "field_eyes_v2" (path "/1d2f7a40-5c1b-4f0e-9a6e-3b8c2d7e5f10" (reference "#PWR0038") (unit 1)))
-		)
-	)
-	(wire
-		(pts (xy 459.74 208.28) (xy 459.74 205.74))
-		(stroke (width 0) (type default))
-		(uuid "060e385d-1d8c-4930-a64f-f7d30322509a")
-	)
-	(label
-		"ESP_EN"
-		(at 459.74 205.74 90)
-		(fields_autoplaced yes)
-		(effects (font (size 1.27 1.27)) (justify left bottom))
-		(uuid "5a91e1c4-9be4-4719-8606-3a0b6a1e80d0")
-	)
-	(symbol
-		(lib_id "Switch:SW_Push")
-		(at 459.74 254 90)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "1658b834-a8ff-4164-afce-810f201a665a")
-		(property "Reference" "SW202" (at 463.1 253.38 90) (effects (font (size 1.27 1.27)) (justify left)))
-		(property "Value" "BOOT" (at 463.1 256.38 90) (effects (font (size 1.27 1.27)) (justify left)))
-		(property
-			"Footprint"
-			"Button_Switch_SMD:SW_SPST_TL3342"
-			(at 459.74 254 0)
-			(effects (font (size 1.27 1.27)) (hide yes))
-		)
-		(property "Datasheet" "~" (at 459.74 254 0) (effects (font (size 1.27 1.27)) (hide yes)))
-		(property "Description" "" (at 459.74 254 0) (effects (font (size 1.27 1.27)) (hide yes)))
-		(pin "1" (uuid "be823b15-3337-4983-9171-0c0c7e7e550f"))
-		(pin "2" (uuid "f6759896-f097-4326-8222-ab093c86894a"))
-		(instances
-			(project "field_eyes_v2" (path "/1d2f7a40-5c1b-4f0e-9a6e-3b8c2d7e5f10" (reference "SW202") (unit 1)))
-		)
-	)
-	(wire
-		(pts (xy 459.74 259.08) (xy 459.74 261.62))
-		(stroke (width 0) (type default))
-		(uuid "74aaa535-4299-4f0e-bd5f-6d2b650023e1")
-	)
-	(symbol
-		(lib_id "power:GND")
-		(at 459.74 261.62 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom no)
-		(on_board no)
-		(dnp no)
-		(uuid "ff0203e7-ffe5-4b76-8016-cae8a68accb0")
-		(property
-			"Reference"
-			"#PWR0039"
-			(at 464.82 260.35 0)
-			(effects (font (size 1.27 1.27)) (justify left) (hide yes))
-		)
-		(property "Value" "GND" (at 464.82 262.89 0) (effects (font (size 1.27 1.27)) (justify left) (hide yes)))
-		(property "Footprint" "" (at 459.74 261.62 0) (effects (font (size 1.27 1.27)) (hide yes)))
-		(property "Datasheet" "~" (at 459.74 261.62 0) (effects (font (size 1.27 1.27)) (hide yes)))
-		(property "Description" "" (at 459.74 261.62 0) (effects (font (size 1.27 1.27)) (hide yes)))
-		(pin "1" (uuid "19ebe77e-a96c-4290-a036-a5a281f2f5aa"))
-		(instances
-			(project "field_eyes_v2" (path "/1d2f7a40-5c1b-4f0e-9a6e-3b8c2d7e5f10" (reference "#PWR0039") (unit 1)))
-		)
-	)
-	(wire
-		(pts (xy 459.74 248.92) (xy 459.74 246.38))
-		(stroke (width 0) (type default))
-		(uuid "79ab4ac9-90dd-4a80-9a3e-2a01ae344848")
-	)
-	(label
-		"ESP_IO0"
-		(at 459.74 246.38 90)
-		(fields_autoplaced yes)
-		(effects (font (size 1.27 1.27)) (justify left bottom))
-		(uuid "25a3c0b3-c7a1-4641-8fb9-0be6aa5a6472")
 	)
 	(symbol
 		(lib_id "Device:R")
