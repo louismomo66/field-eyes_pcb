@@ -1,8 +1,8 @@
 # Field Eyes v2: full board schematic (KiCad 9)
 
-Open `field_eyes_v2.kicad_pro` in KiCad 9. The whole circuit is **one flat schematic** (`field_eyes_v2.kicad_sch`): all 156 parts are on a single page, in four framed sections. The same page is in `field_eyes_v2.pdf`, and the parts list is in `field_eyes_v2_bom.csv`.
+Open `field_eyes_v2.kicad_pro` in KiCad 9. The whole circuit is **one flat schematic** (`field_eyes_v2.kicad_sch`): all 170 parts are on a single page, in four framed sections. The same page is in `field_eyes_v2.pdf`, and the parts list is in `field_eyes_v2_bom.csv`.
 
-The design has 156 parts. KiCad's electrical rules check (ERC) reports 0 violations, and every net connects at least two pins.
+The design has 170 parts. KiCad's electrical rules check (ERC) reports 0 violations, and every net connects at least two pins.
 
 **Status: schematic only.** There is no PCB layout yet. Nothing has been built or tested.
 
@@ -10,9 +10,9 @@ The design has 156 parts. KiCad's electrical rules check (ERC) reports 0 violati
 |---|---|
 | Top of the page | Title, power tree, what changed from the old board, PCB layout notes |
 | 1 Power (parts R1xx, C1xx...) | 6 V solar panel → CN3791 MPPT charger → 18650 cell with DW01A + FS8205 protection. XC6220 3.3 V regulator. AO3401A-switched +3V3_SW and +12V_SENS (MT3608 boost). Battery voltage, temperature and charge-status sensing. |
-| 2 ESP32 (2xx) | ESP32-WROOM-32D. EN delay. RESET and BOOT buttons. Auto-reset programming header (same pin order as the old SV1). OLED and DHT22 headers. 4 × M3 mounting holes. ESP32 pin map. |
+| 2 ESP32 (2xx) | ESP32-WROOM-32D. EN delay. RESET and BOOT buttons. Programming header **SV1** (the same 2 × 3 header and pin order as the old board: DTR, 3V3, TX, RX, RTS, GND) with auto-reset. OLED (**X3**) and DHT22 (**X4**) on 4-pin JST XH connectors with the old board's pinouts. 4 × M3 mounting holes. ESP32 pin map. |
 | 3 Modem (3xx) | A7672S running straight from the cell, with 470 µF and the SIMCom capacitor set. PWRKEY and RESET drivers. UART level shifters. RI wake. Network LED. SIM holder with 22 Ω resistors and ESD. U.FL antenna with matching pads. Service header for modem firmware updates. |
-| 4 Sensors and valve (4xx) | 2 × SP3485 RS485 (SMT100, 7-in-1) with automatic direction, SM712 protection and screw terminals. MX1508 driver for the latching valve (the chip from your mini-L298N module). |
+| 4 Sensors and valve (4xx) | 2 × **MAX485ESA+T** RS485 (SMT100 on **X2**, 7-in-1 on **X1**) with automatic direction and SM712 protection. X1/X2 are 4-pin JST XH, pin 1 A, 2 B, 3 +12 V, 4 GND, as on the old board. A 78L05 (U405) makes the 5 V the MAX485 needs; dividers (3.3k/6.8k) bring its receive output down to 3.4 V for the ESP32. MX1508 driver for the latching valve (the chip from your mini-L298N module). |
 
 The first version had four separate sheets behind placeholder boxes. Those files, and the board file as it was, are kept in `old_hierarchical/`; the circuit is identical (every net connects the same pins) and the board was relinked to the flat schematic.
 
@@ -26,7 +26,7 @@ The first version had four separate sheets behind placeholder boxes. Those files
   - Details and the battery-life estimate are in `../power_v2/README.md`. That earlier power-only project is now part of this one.
 - **Everything that isn't needed is off by default.** The modem stays off until GPIO26 presses its power key. Sensors, RS485 chips, the DHT22 and the 12 V boost only get power while SENS_EN (GPIO13) is high.
 - **Wake on message:** the modem's RI line goes to GPIO35 (an RTC pin), so the ESP32 can sleep and still react to a valve command immediately.
-- **RS485:** SP3485 parts (3.3 V, same pinout as the MAX485). Your existing auto-direction transistor trick is kept. The 120 Ω terminations are drawn but not fitted.
+- **RS485:** the MAX485ESA+T from your old board. It needs 5 V, which this board no longer has, so U405 (78L05) makes +5V_SENS from the 12 V sensor rail; it is only powered while SENS_EN is on. The chip's receive output swings 0–5 V and the ESP32 pins are not 5 V tolerant, so each channel has a 3.3k/6.8k divider. Your auto-direction transistor trick is kept. The 120 Ω terminations are drawn but not fitted.
 - **Valve:** the **MX1508**, the chip on your "mini L298N" driver board, is now on this board, using channel 1.
   - Same inputs as the module: IN1 = GPIO27 → INA1, IN2 = GPIO5 → INB1. H/L opens, L/H closes, both low = standby (< 0.1 µA). The firmware doesn't change.
   - The MX1508's motor supply must stay below 10 V (2–9.6 V for normal use), so it can't take the 12 V sensor rail.
@@ -34,7 +34,7 @@ The first version had four separate sheets behind placeholder boxes. Those files
   - Solder jumper JP401 picks the valve supply: pads 1–2 (default) = 8.7 V for 9 V valves; pads 2–3 = the battery (3.0–4.2 V) for 3.6–6 V valves.
   - The chip's logic runs from +3V3, so the ESP32's 3.3 V signals are always within its input range. The second channel is unused (inputs tied low).
 - **SIM, antenna and modem-service pads** follow the SIMCom A7672X hardware manual (figures 10, 13, 16, 22 and section 4.6).
-- **GNSS is not used** (the location is fixed in the firmware), so the GPS antenna, its LNA supply and the GNSS pins were dropped.
+- **GPS antenna:** kept, with the same circuit as the old board. U.FL connector **J304** takes an active antenna, fed from the modem's 2.8 V through R318 (0 Ω) and L301 (56 nH); C313 (33 pF) blocks the DC. The modem's built-in GNSS is linked to its UART3 by R320/R321 (1k), GNSS_PWRCTL goes to MK_IN_3 through R319 (10k), and 1V8_GNSS and GNSS_VBKP are powered. The firmware doesn't use GPS yet (the location is fixed). For a passive antenna, fit C313 only and leave R318/L301 off.
 
 ## Check these assumptions before ordering
 
@@ -45,7 +45,7 @@ The first version had four separate sheets behind placeholder boxes. Those files
    - If the valve doesn't latch reliably, raise C403 to 6800–10000 µF.
    - The MX1508 channel is rated 1.5 A continuous and 2 A peak, so the coil should be at least about 5 Ω.
 2. **Sensors at 12 V.** The Gemho 7-in-1 needs 9–18 V; the SMT100 accepts 4–24 V.
-3. **Your A7672S variant.** If you need GNSS later, tell me and I'll put that section back.
+3. **GPS antenna type.** The bias circuit assumes an active antenna, like the old board. The GPS trace from J304 to the modem should be short and 50 Ω when you route it.
 
 ## Firmware changes this board needs (not made yet)
 
@@ -67,6 +67,34 @@ The first version had four separate sheets behind placeholder boxes. Those files
    - 50 Ω RF trace from the modem to the U.FL.
    - ESP32 antenna over the board edge with no copper underneath.
    - Battery-temperature NTC (TH101) under the cell.
-   - SM712s at the screw terminals.
+   - SM712s next to the JST sensor connectors X1/X2.
 3. Route the board, pour ground on the bottom layer, then run DRC.
 # field-eyes_pcb
+
+## Connectors (as on the old board)
+
+| Ref | What | Pins |
+|---|---|---|
+| SV1 | Programming, 2 × 3 header (MA03-2) | 1 DTR, 2 3V3, 3 TX0, 4 RX0, 5 RTS, 6 GND |
+| X1 | 7-in-1 NPK sensor, JST XH 4-pin | 1 A, 2 B, 3 +12 V, 4 GND |
+| X2 | SMT100, JST XH 4-pin | 1 A, 2 B, 3 +12 V, 4 GND |
+| X3 | OLED, JST XH 4-pin | 1 3V3, 2 GND, 3 SDA, 4 SCL |
+| X4 | DHT22, JST XH 4-pin | 1 not connected, 2 3V3 (switched), 3 DATA, 4 GND |
+
+The solar input (J101) and the valve coil (J403) stay as 2-pin screw terminals because they carry more current. The board's old X5 (RGB LED / valve module) is gone: the valve driver is now on the board.
+
+The board file was updated to match: the footprints are in `field_eyes.pretty`, which now includes the JST and SV1 footprints copied from your old board. The new parts were placed in free spots and are provisional. Files from before this change are in `backups/`.
+
+## Board layout (follows the old design)
+
+The board is 128.3 × 60 mm with rounded corners: your old board's 100 × 60 mm, widened by 28 mm on the left for the new power and valve circuits. Everything that was on the old board keeps its old position, measured from the old board's right-hand end:
+
+- ESP32 left of centre with SV1 above it, and the GPS connector (J304) with its parts on the top edge
+- the modem on the right, with the LTE antenna connector (J301) on the right edge
+- the SIM tray (J302) on the **bottom edge** near the right corner, with its protection and resistors beside it
+- the sensor connectors X2 (SMT100), X1 (7-in-1) and X4 (DHT22) along the bottom edge; X3 (OLED) beside the ESP32
+- the modem control transistors in a row above the modem, the network LED and its transistor on the right edge, and the modem supply capacitors at the bottom right
+
+New on the left: the solar charger, battery protection, 3.3 V regulator, 12 V boost and switches, the valve driver with its big capacitor, and the solar (J101) and valve (J403) terminals. The 18650 holder is on the back of the board, under the middle, with its temperature sensor.
+
+All parts are placed with no overlaps. No tracks yet. Run `tools/place_like_old.py` again to redo the placement from the previous board (`backups/`).

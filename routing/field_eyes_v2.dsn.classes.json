@@ -1,0 +1,1 @@
+{"ModemPower": [0.8, 0.2, ["/MODEM_VBAT"]], "Power": [0.5, 0.2, ["VSYS", "/SOLAR_RAW", "/SOLAR_P", "/CHG_D", "/CHG_SW", "/CHG_CSP", "/BATN", "/PROT_D", "/SENS_VIN", "/BST_SW", "+12V_SENS", "/VALVE_RES", "/MX_VDD", "/VALVE_A", "/VALVE_B"]], "Supply": [0.35, 0.2, ["GND", "+3V3", "+3V3_SW", "/VDD_1V8", "/SIM_VDD", "/VALVE_9V"]], "RF": [0.6, 0.25, ["/RF_ANT", "/ANT_FEED"]]}
