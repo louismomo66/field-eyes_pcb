@@ -52,7 +52,7 @@ BOTTOM = {'J302', 'X1', 'X2', 'X4', 'U401', 'U402', 'Q401', 'Q402', 'U302', 'R31
 oy_of = lambda ref, oy: oy + (DH if ref in BOTTOM else 0.0)
 # ------------------------------------------------------------------ the old design's positions (old x + DW)
 HARD = {   # parts that sit exactly where they did on the old board: ref: (old x, old y, rotation)
-    'SV1': (50.6, 4.8, 0), 'J304': (59.7, 6.0, 270), 'X3': (54.8, 22.5, 90), 'J301': (95.2, 25.9, 180),
+    'SV1': (50.6, 4.8, 0), 'J301': (95.2, 25.9, 180),
     'J302': (81.4, 51.8, 0), 'X2': (31.2, 55.4, 0), 'X1': (45.4, 55.3, 0), 'X4': (59.6, 55.3, 0),
 }
 for ref, (ox, oy, rot) in HARD.items():
@@ -61,6 +61,21 @@ put('U201', 36.2 + DW, 2.3 + 15.8, 0, origin=True)      # ESP32: body top 2.3 mm
 put('U301', 75.7 + DW, 25.8, 270, origin=True)
 for ref, (x, y) in zip(('H201', 'H202', 'H203', 'H204'), ((3.6, 3.6), (W - 3.6, 3.6), (3.6, H - 3.6), (W - 3.6, H - 3.6))):
     put(ref, x, y)
+# GPS antenna: a clear corridor for the 50 ohm line from the modem's GPS pad (on its left edge) north to the U.FL on the top edge.
+# The U.FL sits just outside the ESP32 antenna keep-out; C313 is in line, L301/R318 (the bias) hang off to the side.
+GPS_PAD = (75.7 + DW - 12.0, 25.8 - 10.0)
+GPS_KEEPOUT = (GPS_PAD[0] - 9.7, 8.6, GPS_PAD[0] + 3.2, GPS_PAD[1] + 3.0)      # nothing but the GPS parts may sit here (room for the 3 mm track to bend)
+put('C313', GPS_PAD[0] - 2.6, 13.8, 90)
+put('L301', GPS_PAD[0] - 6.0, 14.8, 90)
+put('R318', GPS_PAD[0] - 6.0, 11.2, 90)
+best = None                                                    # turn J304 so that its signal pad faces the modem pad
+for rot in (0, 90, 180, 270):
+    put('J304', GPS_PAD[0] - 0.5, 5.6, rot)
+    sig = [pd for pd in fps['J304'].Pads() if pd.GetNumber() == '1'][0].GetPosition()
+    score = (tomm(sig.y) - Y0) * 10 - abs(tomm(sig.x) - X0 - (GPS_PAD[0] - 0.5))
+    if best is None or score > best[0]:
+        best = (score, rot)
+put('J304', GPS_PAD[0] - 0.5, 5.6, best[1])
 put('BT101', W / 2, 34.0, 0)                           # battery holder on the back
 put('TH101', W / 2 + 12, 34.0, 0)
 
@@ -74,7 +89,8 @@ def box(ref):
     return (tomm(b.GetLeft()) - X0, tomm(b.GetTop()) - Y0, tomm(b.GetRight()) - X0, tomm(b.GetBottom()) - Y0)
 
 def pegs():
-    out = []
+    u = fps['U201'].GetPosition()
+    out = [list(GPS_KEEPOUT), [tomm(u.x) - X0 - 24.0, 0.0, tomm(u.x) - X0 + 24.0, tomm(u.y) - Y0 - 9.0]]
     for pad in fps['BT101'].Pads():
         if pad.GetAttribute() == pcbnew.PAD_ATTRIB_NPTH:
             q = pad.GetPosition(); r = tomm(pad.GetDrillSize().x) / 2 + 0.7
@@ -104,7 +120,7 @@ def group(refs, anchor, rot=0):
 
 # parts that had a counterpart on the old board stay near the old position (old x + DW); the rest go to their circuit's area
 NEAR = {
-    'L301': (57.5, 11.3, 90), 'R318': (55.2, 11.3, 90), 'C313': (60.7, 11.4, 90),
+    'X3': (54.8, 27.5, 90),
     'Q304': (66.7, 9.3, 180), 'Q302': (71.8, 9.3, 180), 'Q303': (78.0, 9.4, 0),
     'R319': (93.1, 11.1, 0), 'R313': (94.2, 14.6, 0),
     'C301': (92.0, 40.9, 90), 'D302': (96.1, 30.6, 180), 'Q306': (93.3, 33.2, 90), 'R312': (95.6, 33.1, 0), 'R311': (98.7, 33.1, 0),
@@ -116,13 +132,14 @@ NEAR = {
     'U401': (27.6, 47.4, 0), 'U402': (46.5, 47.1, 0), 'Q401': (28.5, 42.6, 0), 'Q402': (45.8, 43.6, 0),
 }
 # big or fussy first
-for ref in ('C301', 'U401', 'U402', 'U302', 'D302', 'Q306', 'Q304', 'Q302', 'Q303', 'Q401', 'Q402', 'L301', 'R318', 'C313'):
+for ref in ('X3', 'C301', 'U401', 'U402', 'U302', 'D302', 'Q306', 'Q304', 'Q302', 'Q303', 'Q401', 'Q402'):
     ox, oy, rot = NEAR[ref]; autoplace(ref, (ox + DW, oy_of(ref, oy)), rot)
 for ref, (ox, oy, rot) in NEAR.items():
     if ref not in placed:
         autoplace(ref, (ox + DW, oy_of(ref, oy)), rot)
 autoplace('J303', (DW + 99.0, 56.0 + DH), 90)
-autoplace('SW201', (DW + 14.0, 10.0), 90); autoplace('SW202', (DW + 14.0, 20.5), 90)
+for _r, _y in (('SW201', 10.0), ('SW202', 20.5)):
+    if _r in fps: autoplace(_r, (DW + 14.0, _y), 90)
 autoplace('J101', (5.5, 22.0), 90); autoplace('J403', (14.0, H - 6.0), 0); autoplace('C403', (28.0, H - 10.0), 0)
 group(['Q301', 'Q305', 'R301', 'R302', 'R303', 'R304', 'R305', 'R306', 'R307', 'R308', 'R309', 'R310', 'C307', 'C308', 'C309'], (DW + 76.0, 7.0))
 group(['C202', 'C203', 'C204', 'R201', 'C201', 'R202', 'Q201', 'Q202', 'R203', 'R204'], (DW + 36.0, 31.5))

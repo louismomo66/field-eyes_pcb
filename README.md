@@ -106,3 +106,18 @@ All 168 parts are placed with no overlaps. There are no tracks yet. A smaller bo
 ## No buttons
 
 The RESET and BOOT buttons were removed. The board is reset and put in boot mode by the programming adapter on SV1 (RTS drives EN, DTR drives IO0, through the two-transistor auto-reset circuit), so flashing needs an adapter that brings out DTR and RTS on pins 1 and 5. Without a button there is no manual reset: switching the power off and on (or the adapter's RTS) does it.
+
+## Even placement
+
+After the first placement the parts were respread so that no area is crowded while others are empty: parts push each other apart with a light pull towards the parts they are wired to, and the parts that sit where they did on the old board (ESP32, modem, SIM tray, connectors) stay fixed. Parts keep out of the ESP32 antenna zone along the top edge and away from the battery holder's peg holes. Result: the unevenness of the part density across the free area is about halved, the wiring is shorter (signal nets about 8% less total length), and nothing overlaps. `tools/spread_parts.py` does it (export with `tools/export_placement.py`, apply with `tools/apply_positions.py`); the earlier placement is in `backups/field_eyes_v2.before_spreading.kicad_pcb`.
+
+## GPS antenna corridor and RF lines
+
+An antenna line needs a controlled 50 Ω track. On this 1.6 mm two-layer board that is a **microstrip about 3.0 mm wide** (calculated for FR4, εr 4.5, with the unbroken ground plane on the bottom layer under it), kept clear of other copper by about 1.5 mm each side, as short as possible, with ground vias along both sides, and tapered down to the 0.64 mm pad of the modem and the connector's centre pad. So the GPS part of the board is laid out around it:
+
+- J304 (U.FL) sits on the top edge **just outside the ESP32 antenna zone**, with its centre pin facing the modem; the modem's GPS pad (P$90) is on the modem's top-left edge about 9 mm below it.
+- The line runs from J304 straight down to the pad through **C313 (33 pF, in line)**: about 12 mm in all.
+- L301 and R318 (the antenna bias) sit off to the side, away from the line; the bias is DC and can take any route.
+- A **clear corridor** of 13 × 10 mm around the line holds no other part, and the spreading tool keeps it that way. The area under it on the bottom layer is free for the ground plane.
+
+Route `/GPS_ANT`, `/GPS_SIG` (and the LTE nets `/RF_ANT`, `/ANT_FEED`) **by hand**, with a 3.0 mm track, not with the autorouter. `tools/dsn_without.py` makes `routing/field_eyes_v2_autoroute.dsn` without those nets and without ground (ground comes from the pours). The LTE line (modem right edge to J301, about 8 mm) needs the same width and clearance; its parts are placed along the straight line to J301, but it was not given a protected corridor of its own.
