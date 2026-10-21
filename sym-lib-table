@@ -1,0 +1,4 @@
+(sym_lib_table
+  (version 7)
+  (lib (name "field_eyes")(type "KiCad")(uri "${KIPRJMOD}/field_eyes.kicad_sym")(options "")(descr "CN3791, FS8205, A7672S, SIM holder, SMF05C"))
+)

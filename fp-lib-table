@@ -1,0 +1,4 @@
+(fp_lib_table
+  (version 7)
+  (lib (name "field_eyes")(type "KiCad")(uri "${KIPRJMOD}/field_eyes.pretty")(options "")(descr "A7672S and SIM holder from the current board; 18650 holder with 2 pegs"))
+)
